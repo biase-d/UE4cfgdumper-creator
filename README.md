@@ -18,7 +18,7 @@ An enhanced, interactive version of the UE4 configuration dumper for the Nintend
 #### To Manage Dumps (Manage Mode)
 1. Close any running game
 2. Hold the 'R' button while launching any game icon from the Switch Home Menu to open the Homebrew Menu in Title Mode
-3. Run `UE4 Dumper & Creator`. You will be greeted with the interactive management menu
+3. Run `UE4cfgdumper+creator`. You will be greeted with the interactive management menu
 
 ## Credits and Thanks
 
