@@ -37,10 +37,10 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-APP_TITLE   :=  UE4cfgdumper
-APP_VERSION :=  1.2.4
-APP_AUTHOR  :=  MasaGratoR
-TARGET		:=	$(APP_TITLE)
+APP_TITLE   :=  UE4cfgdumper+creator
+APP_VERSION :=  1.2.4-1.0
+APP_AUTHOR  :=  MasaGratoR / biase-d
+TARGET		:=	UE4cfgdumper-creator
 BUILD		:=	build
 SOURCES		:=	source libs/armadillo/source
 DATA		:=	data
@@ -57,7 +57,7 @@ CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++23
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fexceptions -std=c++23
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
