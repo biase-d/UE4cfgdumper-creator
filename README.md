@@ -13,7 +13,7 @@ An enhanced, interactive version of the UE4 configuration dumper for the Nintend
 #### To Scan a Game (Applet Mode)
 1. Launch your target game and get to the main menu
 2. Press the HOME button, then open the Album to launch the Homebrew Menu
-3. Run `UE4 Dumper & Creator`. The scan will begin automatically
+3. Run `UE4cfgdumper+creator`. The scan will begin automatically
 
 #### To Manage Dumps (Manage Mode)
 1. Close any running game
