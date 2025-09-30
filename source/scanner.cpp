@@ -356,14 +356,14 @@ void SearchFramerate() {
 		if (memoryInfoBuffers[i].addr < cheatMetadata.main_nso_extents.base) continue;
 		if (memoryInfoBuffers[i].addr >= cheatMetadata.main_nso_extents.base + cheatMetadata.main_nso_extents.size) continue;
 		
-        char* FFR_result = 0;
+		char* FFR_result = 0;
 		char* FFR2_result = 0;
 		char* CTS_result = 0;
 		uint64_t address = 0;
 		if ((memoryInfoBuffers[i].perm & Perm_R) == Perm_R && (memoryInfoBuffers[i].perm & Perm_Rx) != Perm_Rx && (memoryInfoBuffers[i].type == MemType_CodeStatic || memoryInfoBuffers[i].type == MemType_CodeReadOnly)) {
 			if (memoryInfoBuffers[i].size > 200'000'000) continue;
 			
-            char* buffer_c = new char[memoryInfoBuffers[i].size];
+			char* buffer_c = new char[memoryInfoBuffers[i].size];
 			dmntchtReadCheatProcessMemory(memoryInfoBuffers[i].addr, (void*)buffer_c, memoryInfoBuffers[i].size);
 			FFR_result = (char*)searchString(buffer_c, "FixedFrameRate", memoryInfoBuffers[i].size, true, true);
 			if (!FFR_result) {
@@ -380,16 +380,16 @@ void SearchFramerate() {
 		if (!FFR_result && !FFR2_result) continue;
 
 		uint64_t FFR_final_address = 0;
-        if(FFR_result) {
-            ptrdiff_t FFR_diff = (uint64_t)FFR_result - address;
-		    FFR_final_address = memoryInfoBuffers[i].addr + FFR_diff;
-        }
+		if(FFR_result) {
+		    ptrdiff_t FFR_diff = (uint64_t)FFR_result - address;
+			    FFR_final_address = memoryInfoBuffers[i].addr + FFR_diff;
+		}
 
 		uint64_t FFR2_final_address = 0;
-        if(FFR2_result) {
-            ptrdiff_t FFR2_diff = (uint64_t)FFR2_result - address;
-		    FFR2_final_address = memoryInfoBuffers[i].addr + FFR2_diff;
-        }
+		if(FFR2_result) {
+		    ptrdiff_t FFR2_diff = (uint64_t)FFR2_result - address;
+			    FFR2_final_address = memoryInfoBuffers[i].addr + FFR2_diff;
+		}
 
 		uint64_t CTS_final_address = 0;
 		if (CTS_result) {
@@ -482,13 +482,16 @@ void SearchFramerate() {
 	for (size_t y = 0; y < mappings_count; y++) {
 		if (memoryInfoBuffers[y].addr != cheatMetadata.main_nso_extents.base) continue;
 		
-        uint8_t* buffer_two = new uint8_t[memoryInfoBuffers[y].size];
+        	uint8_t* buffer_two = new uint8_t[memoryInfoBuffers[y].size];
 		dmntchtReadCheatProcessMemory(memoryInfoBuffers[y].addr, (void*)buffer_two, memoryInfoBuffers[y].size);
 		uint8_t pattern_number = 1;
+		
 		uint8_t pattern[] = {	0xA8, 0x99, 0x99, 0x52, 0x88, 0xB9, 0xA7, 0x72, 0x01, 0x10, 0x2C, 0x1E, 0x00, 0x01, 0x27, 0x1E, 0x60, 0x01, 0x80, 0x52};
 		uint8_t pattern_2[] = {	0xF7, 0x37, 0x68, 0x22, 0x40, 0x39};
 		uint8_t pattern_3[] = {	0x08, 0x20, 0x40, 0x39, 0x08, 0x01, 0x20, 0x37};
 		uint8_t pattern_4[] = {	0x68, 0x0A, 0x40, 0xB9, 0x88, 0x03, 0x20, 0x37};
+		uint8_t pattern_5[] = {	0x29, 0x02, 0xF0, 0x36, 0x09, 0x00, 0xA8, 0x52};
+
 		auto it = std::search(buffer_two, &buffer_two[memoryInfoBuffers[y].size], pattern, &pattern[sizeof(pattern)]);
 		if (it == &buffer_two[memoryInfoBuffers[y].size]) {
 			it = std::search(buffer_two, &buffer_two[memoryInfoBuffers[y].size], pattern_2, &pattern_2[sizeof(pattern_2)]);
@@ -502,39 +505,65 @@ void SearchFramerate() {
 			it = std::search(buffer_two, &buffer_two[memoryInfoBuffers[y].size], pattern_4, &pattern_4[sizeof(pattern_4)]);
 			pattern_number = 4;
 		}
+        	if (it == &buffer_two[memoryInfoBuffers[y].size]) {
+			it = std::search(buffer_two, &buffer_two[memoryInfoBuffers[y].size], pattern_5, &pattern_5[sizeof(pattern_5)]);
+			pattern_number = 5;
+		}
+
 		if (it != &buffer_two[memoryInfoBuffers[y].size]) {
 			auto distance = std::distance(buffer_two, it);
 			uint32_t first_instruction = 0, second_instruction = 0, second_alt_instruction = 0;
+			
 			switch(pattern_number) {
-				case 1: distance = distance-(8 * 4); break;
-				case 2: distance = (distance-2) + (3 * 4); break;
-				case 3: distance += 2 * 4; break;
-				case 4: distance += 2 * 4; break;
+				case 1:
+					first_instruction = *(uint32_t*)&buffer_two[distance-(8 * 4)];
+					second_instruction = *(uint32_t*)&buffer_two[distance-(7 * 4)];
+					distance = distance-(8 * 4);
+					break;
+				case 2:
+					first_instruction = *(uint32_t*)&buffer_two[(distance-2) + (3 * 4)];
+					second_instruction = *(uint32_t*)&buffer_two[(distance-2) + (5 * 4)];
+					second_alt_instruction = *(uint32_t*)&buffer_two[(distance-2) + (4 * 4)];
+					distance = (distance-2) + (3 * 4);
+					break;
+				case 3:
+					first_instruction = *(uint32_t*)&buffer_two[distance + (2 * 4)];
+					second_instruction = *(uint32_t*)&buffer_two[distance + (3 * 4)];
+					distance += 2 * 4;
+					break;
+				case 4:
+					first_instruction = *(uint32_t*)&buffer_two[distance + (2 * 4)];
+					second_instruction = *(uint32_t*)&buffer_two[distance + (4 * 4)];
+					distance += 2 * 4;
+					break;
+                		case 5:
+					first_instruction = *(uint32_t*)&buffer_two[distance + (6 * 4)];
+					second_instruction = *(uint32_t*)&buffer_two[distance + (8 * 4)];
+					distance += 6 * 4; 
+					break;
 			}
-            first_instruction = *(uint32_t*)&buffer_two[distance];
-            second_instruction = *(uint32_t*)&buffer_two[distance + (pattern_number == 2 ? 2 : 1) * 4];
-            if (pattern_number == 2) second_alt_instruction = *(uint32_t*)&buffer_two[distance + 4];
 
 			ad_insn *insn = NULL;
 			uint32_t main_offset = 0;
 			ArmadilloDisassemble(first_instruction, distance, &insn);
-			if (insn && insn -> instr_id == AD_INSTR_ADRP) {
-				main_offset = insn -> operands[1].op_imm.bits;
+			if (insn && insn->instr_id == AD_INSTR_ADRP) {
+				main_offset = insn->operands[1].op_imm.bits;
 				ArmadilloDone(&insn);
-				ArmadilloDisassemble(second_instruction, distance + (pattern_number == 2 ? 2 : 1) * 4, &insn);
+				ArmadilloDisassemble(second_instruction, distance + 4, &insn);
 				if (insn && insn->num_operands == 2 && second_alt_instruction != 0) {
 					ArmadilloDone(&insn);
 					ArmadilloDisassemble(second_alt_instruction, distance + 4, &insn);
 				}
-				if (insn && (insn -> instr_id == AD_INSTR_LDR || insn -> instr_id == AD_INSTR_STR) && insn -> num_operands == 3 && insn -> operands[2].type == AD_OP_IMM) {
-					main_offset += insn -> operands[2].op_imm.bits;
+				if (insn && (insn->instr_id == AD_INSTR_LDR || insn->instr_id == AD_INSTR_STR) && insn->num_operands == 3 && insn->operands[2].type == AD_OP_IMM) {
+					main_offset += insn->operands[2].op_imm.bits;
 					ArmadilloDone(&insn);
 					uint64_t GameEngine_ptr = 0;
 					switch(pattern_number) {
 						case 1: dmntchtReadCheatProcessMemory(cheatMetadata.main_nso_extents.base + main_offset, (void*)&GameEngine_ptr, 8); break;
 						case 2:
 						case 3:
-						case 4: GameEngine_ptr = cheatMetadata.main_nso_extents.base + main_offset; break;
+						case 4:
+                        			case 5: GameEngine_ptr = cheatMetadata.main_nso_extents.base + main_offset; break;
 					}
 					printf("Main offset of GameEngine pointer: " CONSOLE_YELLOW "0x%lX\n" CONSOLE_RESET, GameEngine_ptr - cheatMetadata.main_nso_extents.base);
 					uint64_t GameEngine = 0;
