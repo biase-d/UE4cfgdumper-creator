@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 APP_TITLE   :=  UE4cfgdumper+creator
-APP_VERSION :=  1.2.8-1.0
+APP_VERSION :=  1.2.8-1.5
 APP_AUTHOR  :=  MasaGratoR / biase-d
 TARGET		:=	UE4cfgdumper-creator
 BUILD		:=	build
